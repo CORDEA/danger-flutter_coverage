@@ -25,3 +25,9 @@ Layout/EndOfLine:
 
 Style/Documentation:
   Enabled: false
+
+Metrics/AbcSize:
+  Max: 50
+
+Metrics/MethodLength:
+  Max: 50
