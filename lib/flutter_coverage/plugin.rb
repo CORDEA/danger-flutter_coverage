@@ -8,9 +8,29 @@ module Danger
       raise "The coverage file could not be found." unless File.exist?(coverage_path)
 
       cov = parse_lcov(File.readlines(coverage_path, chomp: true))
+      markdown format_as_markdown(cov)
     end
 
     private
+
+    def format_as_markdown(cov)
+      target = git.modified_files - git.deleted_files - git.renamed_files
+      lines = [
+        '### Coverage report
+
+| Name | Coverage |
+|:---|---:|
+'
+      ]
+      target.each do |t|
+        i = cov.find_index { |c| c.name == t }
+        if i
+          c = cov[i]
+          lines.push("| #{c.name} | #{format('%.1f', c.calculate)}% |\n")
+        end
+      end
+      lines.join
+    end
 
     def parse_lcov(lines)
       cov = []
@@ -27,9 +47,9 @@ module Danger
           n, c = value.split(",")
           line_cov.push(LineCoverage.new(n.to_i, c.to_i))
         when "LF"
-          lf = value.to_i
+          lf = value.to_f
         when "LH"
-          lh = value.to_i
+          lh = value.to_f
         when "end_of_record"
           cov.push(Coverage.new(name, line_cov, lf, lh))
           name = ""
@@ -53,7 +73,7 @@ module Danger
       end
 
       def calculate
-        @number_of_instrumented_lines / @number_of_lines
+        (@number_of_instrumented_lines / @number_of_lines) * 100
       end
     end
 
