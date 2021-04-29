@@ -5,10 +5,12 @@ module Danger
     attr_accessor :coverage_path
 
     def print
-      raise "The coverage file could not be found." unless File.exist?(coverage_path)
-
-      cov = parse_lcov(File.readlines(coverage_path, chomp: true))
-      markdown format_as_markdown(cov)
+      if File.exist?(coverage_path)
+        cov = parse_lcov(File.readlines(coverage_path, chomp: true))
+        markdown format_as_markdown(cov)
+      else
+        fail "The coverage file could not be found."
+      end
     end
 
     private
