@@ -1,33 +1,32 @@
 module Danger
-  # This is your plugin class. Any attributes or methods you expose here will
-  # be available from within your Dangerfile.
-  #
-  # To be published on the Danger plugins site, you will need to have
-  # the public interface documented. Danger uses [YARD](http://yardoc.org/)
-  # for generating documentation from your plugin source, and you can verify
-  # by running `danger plugins lint` or `bundle exec rake spec`.
-  #
-  # You should replace these comments with a public description of your library.
-  #
-  # @example Ensure people are well warned about merging on Mondays
-  #
-  #          my_plugin.warn_on_mondays
-  #
-  # @see  Yoshihiro Tanaka/danger-flutter_coverage
-  # @tags monday, weekends, time, rattata
-  #
   class DangerFlutterCoverage < Plugin
+    class Coverage
+      attr_reader :name
+      attr_reader :line_coverages
 
-    # An attribute that you can read/write from your Dangerfile
-    #
-    # @return   [Array<String>]
-    attr_accessor :my_attribute
+      def initialize(name, line_coverages, lines, instrumented_lines)
+        @name = name
+        @line_coverages = line_coverages
+        @number_of_lines = lines
+        @number_of_instrumented_lines = instrumented_lines
+      end
 
-    # A method that you can call from your Dangerfile
-    # @return   [Array<String>]
-    #
-    def warn_on_mondays
-      warn 'Trying to merge code on a Monday' if Date.today.wday == 1
+      def calculate
+        @number_of_instrumented_lines / @number_of_lines
+      end
+    end
+
+    class LineCoverage
+      attr_reader :line_number
+
+      def initialize(line_number, execution_count)
+        @line_number = line_number
+        @execution_count = execution_count
+      end
+
+      def instrumented?
+        @execution_count > 0
+      end
     end
   end
 end
