@@ -31,7 +31,11 @@ module Danger
           lines.push("| #{c.name} | #{format('%.1f', c.calculate)}% |\n")
         end
       end
-      lines.join
+      if lines.length > 1
+        lines.join
+      else
+        "### Coverage report\n\nNo changes.\n"
+      end
     end
 
     def parse_lcov(lines)
