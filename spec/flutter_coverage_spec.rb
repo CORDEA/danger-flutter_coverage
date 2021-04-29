@@ -5,43 +5,81 @@ require File.expand_path("spec_helper", __dir__)
 module Danger
   describe Danger::DangerFlutterCoverage do
     it "is a plugin" do
-      expect(Danger::DangerFlutterCoverage()).to be_a Danger::Plugin
+      # noinspection RubyArgCount
+      expect(Danger::DangerFlutterCoverage.new(nil)).to be_a Danger::Plugin
+    end
+  end
+
+  describe "#print" do
+    before do
+      @dangerfile = testing_dangerfile
+      @flutter_coverage = @dangerfile.flutter_coverage
+
+      @flutter_coverage.coverage_path = "./spec/fixtures/lcov.info"
     end
 
-    #
-    # You should test your custom attributes and methods here
-    #
-    describe "with Dangerfile" do
+    it "coverage report should not be printed" do
+      @flutter_coverage.coverage_path = ""
+      @flutter_coverage.print
+      expect(@dangerfile.status_report[:errors].first).to eq("The coverage file could not be found.")
+    end
+
+    context "with modified files" do
       before do
-        @dangerfile = testing_dangerfile
-        @my_plugin = @dangerfile.flutter_coverage
-
-        # mock the PR data
-        # you can then use this, eg. github.pr_author, later in the spec
-        # example json: `curl https://api.github.com/repos/danger/danger-plugin-template/pulls/18 > github_pr.json`
-        json = File.read("#{File.dirname(__FILE__)}/support/fixtures/github_pr.json")
-        allow(@my_plugin.github).to receive(:pr_json).and_return(json)
+        allow(@flutter_coverage.git).to receive(:modified_files).and_return %w[lib/a.dart lib/b.dart lib/c.dart]
+        allow(@flutter_coverage.git).to receive(:deleted_files).and_return []
+        allow(@flutter_coverage.git).to receive(:renamed_files).and_return []
       end
 
-      # Some examples for writing tests
-      # You should replace these with your own.
+      it "coverage report should be printed" do
+        @flutter_coverage.print
+        expected = "### Coverage report\n\n| Name | Coverage |\n|:---|---:|
+| lib/a.dart | 25.0% |\n| lib/b.dart | 0.0% |\n| lib/c.dart | 72.7% |\n"
+        expect(@dangerfile.status_report[:markdowns].first.message).to eq(expected)
+      end
+    end
 
-      it "Warns on a monday" do
-        monday_date = Date.parse("2016-07-11")
-        allow(Date).to receive(:today).and_return monday_date
-
-        @my_plugin.warn_on_mondays
-
-        expect(@dangerfile.status_report[:warnings]).to eq(["Trying to merge code on a Monday"])
+    context "with modified & deleted files" do
+      before do
+        allow(@flutter_coverage.git).to receive(:modified_files).and_return %w[lib/a.dart lib/b.dart lib/c.dart]
+        allow(@flutter_coverage.git).to receive(:deleted_files).and_return %w[lib/b.dart]
+        allow(@flutter_coverage.git).to receive(:renamed_files).and_return []
       end
 
-      it "Does nothing on a tuesday" do
-        monday_date = Date.parse("2016-07-12")
-        allow(Date).to receive(:today).and_return monday_date
+      it "coverage report should be printed without deleted files" do
+        @flutter_coverage.print
+        expected = "### Coverage report\n\n| Name | Coverage |\n|:---|---:|
+| lib/a.dart | 25.0% |\n| lib/c.dart | 72.7% |\n"
+        expect(@dangerfile.status_report[:markdowns].first.message).to eq(expected)
+      end
+    end
 
-        @my_plugin.warn_on_mondays
+    context "with modified & renamed files" do
+      before do
+        allow(@flutter_coverage.git).to receive(:modified_files).and_return %w[lib/a.dart lib/b.dart lib/c.dart]
+        allow(@flutter_coverage.git).to receive(:deleted_files).and_return []
+        allow(@flutter_coverage.git).to receive(:renamed_files).and_return %w[lib/c.dart]
+      end
 
-        expect(@dangerfile.status_report[:warnings]).to eq([])
+      it "coverage report should be printed without renamed files" do
+        @flutter_coverage.print
+        expected = "### Coverage report\n\n| Name | Coverage |\n|:---|---:|
+| lib/a.dart | 25.0% |\n| lib/b.dart | 0.0% |\n"
+        expect(@dangerfile.status_report[:markdowns].first.message).to eq(expected)
+      end
+    end
+
+    context "with deleted & renamed files" do
+      before do
+        allow(@flutter_coverage.git).to receive(:modified_files).and_return []
+        allow(@flutter_coverage.git).to receive(:deleted_files).and_return %w[lib/a.dart]
+        allow(@flutter_coverage.git).to receive(:renamed_files).and_return %w[lib/c.dart]
+      end
+
+      it "coverage report should not be printed" do
+        @flutter_coverage.print
+        expected = "### Coverage report\n\nNo changes.\n"
+        expect(@dangerfile.status_report[:markdowns].first.message).to eq(expected)
       end
     end
   end
