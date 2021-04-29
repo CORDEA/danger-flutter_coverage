@@ -1,13 +1,13 @@
+# frozen_string_literal: true
+
 module Danger
   class DangerFlutterCoverage < Plugin
     attr_accessor :coverage_path
 
     def print
-      if File.exist?(coverage_path)
-        parse_lcov(File.readlines(coverage_path, chomp: true))
-      else
-        fail "The coverage file could not be found."
-      end
+      raise "The coverage file could not be found." unless File.exist?(coverage_path)
+
+      parse_lcov(File.readlines(coverage_path, chomp: true))
     end
 
     private
@@ -15,8 +15,7 @@ module Danger
     def parse_lcov(lines) end
 
     class Coverage
-      attr_reader :name
-      attr_reader :line_coverages
+      attr_reader :name, :line_coverages
 
       def initialize(name, line_coverages, lines, instrumented_lines)
         @name = name
@@ -39,7 +38,7 @@ module Danger
       end
 
       def instrumented?
-        @execution_count > 0
+        @execution_count.positive?
       end
     end
   end
