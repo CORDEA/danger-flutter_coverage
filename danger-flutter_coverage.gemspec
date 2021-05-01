@@ -9,8 +9,8 @@ Gem::Specification.new do |spec|
   spec.version = FlutterCoverage::VERSION
   spec.authors = ["Yoshihiro Tanaka"]
   spec.email = ["contact@cordea.jp"]
-  spec.description = "A short description of danger-flutter_coverage."
-  spec.summary = "A longer description of danger-flutter_coverage."
+  spec.description = "Comment the coverage report on the PR."
+  spec.summary = "Comment the coverage report on the PR."
   spec.homepage = "https://github.com/CORDEA/danger-flutter_coverage"
   spec.license = "MIT"
 

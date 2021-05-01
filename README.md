@@ -1,15 +1,15 @@
 # danger-flutter_coverage
 
-A description of danger-flutter_coverage.
+Comment the coverage report on the PR. It was created for a very limited purpose, so there is no plans to publish this
+plugin for now.
 
 ## Installation
 
-    $ gem install danger-flutter_coverage
+TBD
 
 ## Usage
 
-    Methods and attributes from this plugin are available in
-    your `Dangerfile` under the `flutter_coverage` namespace.
+TBD
 
 ## Development
 
