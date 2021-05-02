@@ -6,7 +6,7 @@ module Danger
   describe Danger::DangerFlutterCoverage do
     it "is a plugin" do
       # noinspection RubyArgCount
-      expect(Danger::DangerFlutterCoverage.new(nil)).to be_a Danger::Plugin
+      expect(described_class.new(nil)).to be_a Danger::Plugin
     end
   end
 

@@ -5,7 +5,7 @@ require:
 
 AllCops:
   NewCops: enable
-  TargetRubyVersion: 3.0
+  TargetRubyVersion: 2.7
 
 Style/StringLiterals:
   EnforcedStyle: double_quotes
@@ -26,6 +26,7 @@ Metrics/MethodLength:
 Metrics/BlockLength:
   Exclude:
     - '**/spec/**/*'
+    - '*.gemspec'
 
 Lint/UselessAssignment:
   Exclude:
